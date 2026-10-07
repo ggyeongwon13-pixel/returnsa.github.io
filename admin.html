@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>STONE - 관리자</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial,"Noto Sans KR",sans-serif;
+    background:#0b0d10;
+    color:#fff;
+    min-height:100vh;
+}
+
+.container{
+    width:100%;
+    max-width:900px;
+    margin:auto;
+    padding:40px 20px;
+}
+
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:40px;
+    padding-bottom:20px;
+    border-bottom:1px solid #292f35;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:5px;
+}
+
+.logo span{
+    color:#d8a75d;
+}
+
+.back{
+    color:#999;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.back:hover{
+    color:#fff;
+}
+
+.box{
+    background:#14181d;
+    border:1px solid #272d34;
+    border-radius:8px;
+    padding:30px;
+    margin-bottom:25px;
+}
+
+.box h2{
+    font-size:22px;
+    margin-bottom:25px;
+}
+
+label{
+    display:block;
+    color:#aaa;
+    font-size:14px;
+    margin-bottom:8px;
+}
+
+input,
+textarea,
+select{
+    width:100%;
+    background:#0d1013;
+    color:#fff;
+    border:1px solid #30363d;
+    border-radius:5px;
+    padding:13px;
+    margin-bottom:18px;
+    font-size:14px;
+    outline:none;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+    border-color:#d8a75d;
+}
+
+textarea{
+    min-height:250px;
+    resize:vertical;
+}
+
+button{
+    border:none;
+    border-radius:5px;
+    padding:13px 25px;
+    background:#d8a75d;
+    color:#111;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#e7bd7c;
+}
+
+.logout{
+    background:#292f35;
+    color:#fff;
+}
+
+.logout:hover{
+    background:#3a424a;
+}
+
+.login-box{
+    max-width:500px;
+    margin:100px auto;
+}
+
+.login-box h1{
+    text-align:center;
+    margin-bottom:35px;
+    letter-spacing:4px;
+}
+
+.error{
+    color:#e77;
+    font-size:14px;
+    margin-bottom:15px;
+}
+
+.success{
+    color:#9bd18b;
+    font-size:14px;
+    margin-bottom:15px;
+}
+
+.post-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    padding:18px 0;
+    border-bottom:1px solid #292f35;
+}
+
+.post-item:last-child{
+    border-bottom:none;
+}
+
+.post-info{
+    min-width:0;
+}
+
+.post-title{
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.post-meta{
+    color:#777;
+    font-size:13px;
+}
+
+.delete{
+    background:#24292f;
+    color:#ccc;
+    padding:8px 14px;
+    font-size:12px;
+    flex-shrink:0;
+}
+
+.delete:hover{
+    background:#7d3030;
+    color:#fff;
+}
+
+#adminPanel{
+    display:none;
+}
+
+.user-info{
+    color:#777;
+    font-size:13px;
+}
+
+@media(max-width:600px){
+
+    .container{
+        padding:25px 15px;
+    }
+
+    .box{
+        padding:20px;
+    }
+
+    header{
+        align-items:flex-start;
+    }
+
+    .post-item{
+        align-items:flex-start;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- 로그인 화면 -->
+
+<div id="loginScreen">
+
+<div class="login-box box">
+
+<h1>STONE ADMIN</h1>
+
+<div id="loginError" class="error"></div>
+
+<label for="email">
+이메일
+</label>
+
+<input
+type="email"
+id="email"
+placeholder="관리자 이메일"
+>
+
+<label for="password">
+비밀번호
+</label>
+
+<input
+type="password"
+id="password"
+placeholder="비밀번호"
+>
+
+<button
+id="loginButton"
+style="width:100%;"
+>
+로그인
+</button>
+
+<br><br>
+
+<a
+href="index.html"
+class="back"
+style="display:block;text-align:center;"
+>
+← 홈페이지로 돌아가기
+</a>
+
+</div>
+
+</div>
+
+
+<!-- 관리자 화면 -->
+
+<div id="adminPanel">
+
+<div class="container">
+
+<header>
+
+<div class="logo">
+<span>STONE</span>
+</div>
+
+<div>
+
+<span id="userEmail" class="user-info"></span>
+
+&nbsp;&nbsp;
+
+<button
+id="logoutButton"
+class="logout"
+>
+로그아웃
+</button>
+
+</div>
+
+</header>
+
+
+<!-- 글쓰기 -->
+
+<div class="box">
+
+<h2>게시글 작성</h2>
+
+<div id="writeMessage"></div>
+
+
+<label for="category">
+게시판
+</label>
+
+<select id="category">
+
+<option value="공지">
+공지사항
+</option>
+
+<option value="초보자 가이드">
+초보자 가이드
+</option>
+
+<option value="레이드 가이드">
+레이드 가이드
+</option>
+
+<option value="펫 가이드">
+펫 가이드
+</option>
+
+<option value="성장 가이드">
+성장 가이드
+</option>
+
+<option value="이벤트">
+이벤트
+</option>
+
+</select>
+
+
+<label for="title">
+제목
+</label>
+
+<input
+type="text"
+id="title"
+placeholder="게시글 제목을 입력하세요"
+>
+
+
+<label for="content">
+내용
+</label>
+
+<textarea
+id="content"
+placeholder="게시글 내용을 입력하세요."
+></textarea>
+
+
+<button id="writeButton">
+게시글 등록
+</button>
+
+</div>
+
+
+<!-- 게시글 관리 -->
+
+<div class="box">
+
+<h2>게시글 관리</h2>
+
+<div id="postList">
+게시글을 불러오는 중입니다...
+</div>
+
+</div>
+
+
+<div style="text-align:center;margin-top:30px;">
+
+<a
+href="index.html"
+class="back"
+>
+← STONE 홈페이지
+</a>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<script type="module">
+
+
+import {
+initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+
+
+import {
+getAuth,
+signInWithEmailAndPassword,
+onAuthStateChanged,
+signOut
+}
+from
+"https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+serverTimestamp,
+query,
+orderBy
+}
+from
+"https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+
+/* Firebase 설정 */
+
+const firebaseConfig = {
+
+apiKey:
+"AIzaSyCapWhulNYUFU0s683VbFeyKj1rm7ag2uI",
+
+authDomain:
+"return-sa.firebaseapp.com",
+
+projectId:
+"return-sa",
+
+storageBucket:
+"return-sa.firebasestorage.app",
+
+messagingSenderId:
+"904271573626",
+
+appId:
+"1:904271573626:web:1112f5d34c2bc6de2141c3",
+
+measurementId:
+"G-F9ZQ33GHYS"
+
+};
+
+
+const app =
+initializeApp(firebaseConfig);
+
+
+const auth =
+getAuth(app);
+
+
+const db =
+getFirestore(app);
+
+
+/* 화면 요소 */
+
+const loginScreen =
+document.getElementById("loginScreen");
+
+const adminPanel =
+document.getElementById("adminPanel");
+
+const loginButton =
+document.getElementById("loginButton");
+
+const logoutButton =
+document.getElementById("logoutButton");
+
+const loginError =
+document.getElementById("loginError");
+
+const userEmail =
+document.getElementById("userEmail");
+
+const writeButton =
+document.getElementById("writeButton");
+
+const writeMessage =
+document.getElementById("writeMessage");
+
+const postList =
+document.getElementById("postList");
+
+
+/* 로그인 */
+
+loginButton.addEventListener(
+"click",
+async () => {
+
+const email =
+document.getElementById("email").value.trim();
+
+const password =
+document.getElementById("password").value;
+
+
+loginError.textContent = "";
+
+
+if(!email || !password){
+
+loginError.textContent =
+"이메일과 비밀번호를 입력해주세요.";
+
+return;
+
+}
+
+
+try{
+
+loginButton.disabled = true;
+
+loginButton.textContent =
+"로그인 중...";
+
+
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+
+}catch(error){
+
+console.error(error);
+
+loginError.textContent =
+"이메일 또는 비밀번호가 올바르지 않습니다.";
+
+}finally{
+
+loginButton.disabled = false;
+
+loginButton.textContent =
+"로그인";
+
+}
+
+});
+
+
+/* 로그인 상태 확인 */
+
+onAuthStateChanged(
+auth,
+async user => {
+
+if(user){
+
+loginScreen.style.display =
+"none";
+
+adminPanel.style.display =
+"block";
+
+userEmail.textContent =
+user.email || "";
+
+await loadPosts();
+
+}else{
+
+loginScreen.style.display =
+"block";
+
+adminPanel.style.display =
+"none";
+
+}
+
+});
+
+
+/* 로그아웃 */
+
+logoutButton.addEventListener(
+"click",
+async () => {
+
+await signOut(auth);
+
+});
+
+
+/* 게시글 작성 */
+
+writeButton.addEventListener(
+"click",
+async () => {
+
+const category =
+document.getElementById("category").value;
+
+const title =
+document.getElementById("title").value.trim();
+
+const content =
+document.getElementById("content").value.trim();
+
+
+writeMessage.className = "";
+writeMessage.textContent = "";
+
+
+if(!title){
+
+writeMessage.className =
+"error";
+
+writeMessage.textContent =
+"제목을 입력해주세요.";
+
+return;
+
+}
+
+
+if(!content){
+
+writeMessage.className =
+"error";
+
+writeMessage.textContent =
+"내용을 입력해주세요.";
+
+return;
+
+}
+
+
+try{
+
+writeButton.disabled = true;
+
+writeButton.textContent =
+"등록 중...";
+
+
+await addDoc(
+collection(db,"posts"),
+{
+
+category:category,
+
+title:title,
+
+content:content,
+
+createdAt:serverTimestamp()
+
+}
+);
+
+
+document.getElementById("title").value = "";
+
+document.getElementById("content").value = "";
+
+
+writeMessage.className =
+"success";
+
+writeMessage.textContent =
+"게시글이 등록되었습니다.";
+
+
+await loadPosts();
+
+
+}catch(error){
+
+console.error(error);
+
+writeMessage.className =
+"error";
+
+writeMessage.textContent =
+"게시글 등록에 실패했습니다.";
+
+}finally{
+
+writeButton.disabled = false;
+
+writeButton.textContent =
+"게시글 등록";
+
+}
+
+});
+
+
+/* 게시글 불러오기 */
+
+async function loadPosts(){
+
+try{
+
+const q =
+query(
+collection(db,"posts"),
+orderBy("createdAt","desc")
+);
+
+const snapshot =
+await getDocs(q);
+
+
+if(snapshot.empty){
+
+postList.innerHTML =
+'<div style="color:#777;">등록된 게시글이 없습니다.</div>';
+
+return;
+
+}
+
+
+postList.innerHTML = "";
+
+
+snapshot.forEach(
+docSnap => {
+
+const data =
+docSnap.data();
+
+
+const item =
+document.createElement("div");
+
+item.className =
+"post-item";
+
+
+const info =
+document.createElement("div");
+
+info.className =
+"post-info";
+
+
+const title =
+document.createElement("div");
+
+title.className =
+"post-title";
+
+title.textContent =
+data.title || "제목 없음";
+
+
+const meta =
+document.createElement("div");
+
+meta.className =
+"post-meta";
+
+meta.textContent =
+data.category || "공지";
+
+
+info.appendChild(title);
+
+info.appendChild(meta);
+
+
+const deleteButton =
+document.createElement("button");
+
+deleteButton.className =
+"delete";
+
+deleteButton.textContent =
+"삭제";
+
+
+deleteButton.addEventListener(
+"click",
+async () => {
+
+const confirmed =
+confirm(
+"이 게시글을 삭제하시겠습니까?"
+);
+
+
+if(!confirmed){
+return;
+}
+
+
+try{
+
+await deleteDoc(
+doc(db,"posts",docSnap.id)
+);
+
+await loadPosts();
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"게시글 삭제에 실패했습니다."
+);
+
+}
+
+});
+
+
+item.appendChild(info);
+
+item.appendChild(deleteButton);
+
+postList.appendChild(item);
+
+});
+
+
+}catch(error){
+
+console.error(error);
+
+postList.innerHTML =
+'<div style="color:#e77;">게시글을 불러오지 못했습니다.</div>';
+
+}
+
+}
+
+
+</script>
+
+</body>
+</html>
