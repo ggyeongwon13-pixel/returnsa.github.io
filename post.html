@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>STONE - 게시글</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial,"Noto Sans KR",sans-serif;
+    background:#0b0d10;
+    color:#fff;
+    line-height:1.8;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:40px 20px 80px;
+}
+
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:25px;
+    margin-bottom:50px;
+    border-bottom:1px solid #292f35;
+}
+
+.logo{
+    font-size:30px;
+    font-weight:900;
+    letter-spacing:5px;
+}
+
+.logo span{
+    color:#d8a75d;
+}
+
+.back{
+    color:#999;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.back:hover{
+    color:#fff;
+}
+
+.post-box{
+    background:#14181d;
+    border:1px solid #272d34;
+    border-radius:8px;
+    padding:40px;
+}
+
+.category{
+    display:inline-block;
+    color:#d8a75d;
+    font-size:13px;
+    margin-bottom:15px;
+    border:1px solid #5a4630;
+    padding:4px 10px;
+    border-radius:4px;
+}
+
+h1{
+    font-size:32px;
+    line-height:1.4;
+    margin-bottom:12px;
+}
+
+.date{
+    color:#666;
+    font-size:13px;
+    padding-bottom:25px;
+    border-bottom:1px solid #292f35;
+    margin-bottom:30px;
+}
+
+.content{
+    color:#ccc;
+    white-space:pre-wrap;
+    word-break:break-word;
+    font-size:16px;
+    min-height:250px;
+}
+
+.bottom{
+    margin-top:40px;
+    text-align:center;
+}
+
+.home-button{
+    display:inline-block;
+    padding:12px 25px;
+    background:#d8a75d;
+    color:#111;
+    border-radius:5px;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.home-button:hover{
+    background:#e7bd7c;
+}
+
+.loading{
+    text-align:center;
+    color:#777;
+    padding:100px 20px;
+}
+
+.error{
+    text-align:center;
+    color:#d77;
+    padding:100px 20px;
+}
+
+@media(max-width:600px){
+
+    .container{
+        padding:25px 15px 60px;
+    }
+
+    header{
+        margin-bottom:30px;
+    }
+
+    .logo{
+        font-size:24px;
+    }
+
+    .post-box{
+        padding:25px 20px;
+    }
+
+    h1{
+        font-size:25px;
+    }
+
+    .content{
+        font-size:15px;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+
+<a href="index.html" class="logo">
+<span>STONE</span>
+</a>
+
+<a href="index.html#notice" class="back">
+← 목록으로
+</a>
+
+</header>
+
+<div id="postArea">
+
+<div class="loading">
+게시글을 불러오는 중입니다...
+</div>
+
+</div>
+
+</div>
+
+
+<script type="module">
+
+import {
+initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+
+import {
+getFirestore,
+doc,
+getDoc
+}
+from
+"https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+
+apiKey:
+"AIzaSyCapWhulNYUFU0s683VbFeyKj1rm7ag2uI",
+
+authDomain:
+"return-sa.firebaseapp.com",
+
+projectId:
+"return-sa",
+
+storageBucket:
+"return-sa.firebasestorage.app",
+
+messagingSenderId:
+"904271573626",
+
+appId:
+"1:904271573626:web:1112f5d34c2bc6de2141c3",
+
+measurementId:
+"G-F9ZQ33GHYS"
+
+};
+
+
+const app =
+initializeApp(firebaseConfig);
+
+const db =
+getFirestore(app);
+
+const postArea =
+document.getElementById("postArea");
+
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const postId =
+params.get("id");
+
+
+function formatDate(timestamp){
+
+if(!timestamp){
+    return "";
+}
+
+const date =
+timestamp.toDate();
+
+const year =
+date.getFullYear();
+
+const month =
+String(
+date.getMonth()+1
+).padStart(2,"0");
+
+const day =
+String(
+date.getDate()
+).padStart(2,"0");
+
+const hour =
+String(
+date.getHours()
+).padStart(2,"0");
+
+const minute =
+String(
+date.getMinutes()
+).padStart(2,"0");
+
+return `${year}.${month}.${day} ${hour}:${minute}`;
+
+}
+
+
+function escapeHtml(text){
+
+return String(text)
+
+.replace(/&/g,"&amp;")
+
+.replace(/</g,"&lt;")
+
+.replace(/>/g,"&gt;")
+
+.replace(/"/g,"&quot;")
+
+.replace(/'/g,"&#039;");
+
+}
+
+
+async function loadPost(){
+
+if(!postId){
+
+postArea.innerHTML = `
+
+<div class="error">
+
+게시글을 찾을 수 없습니다.
+
+<br><br>
+
+<a
+href="index.html"
+class="home-button"
+>
+홈페이지로 돌아가기
+</a>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+try{
+
+const postRef =
+doc(
+db,
+"posts",
+postId
+);
+
+const snapshot =
+await getDoc(postRef);
+
+
+if(!snapshot.exists()){
+
+postArea.innerHTML = `
+
+<div class="error">
+
+존재하지 않는 게시글입니다.
+
+<br><br>
+
+<a
+href="index.html#notice"
+class="home-button"
+>
+목록으로 돌아가기
+</a>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+const data =
+snapshot.data();
+
+
+const category =
+data.category || "공지";
+
+const title =
+data.title || "제목 없음";
+
+const content =
+data.content || "";
+
+const date =
+formatDate(
+data.createdAt
+);
+
+
+postArea.innerHTML = `
+
+<article class="post-box">
+
+<div class="category">
+${escapeHtml(category)}
+</div>
+
+<h1>
+${escapeHtml(title)}
+</h1>
+
+<div class="date">
+${date}
+</div>
+
+<div class="content">
+${escapeHtml(content)}
+</div>
+
+</article>
+
+<div class="bottom">
+
+<a
+href="index.html#notice"
+class="home-button"
+>
+← 목록으로 돌아가기
+</a>
+
+</div>
+
+`;
+
+}catch(error){
+
+console.error(error);
+
+postArea.innerHTML = `
+
+<div class="error">
+
+게시글을 불러오지 못했습니다.
+
+<br><br>
+
+<a
+href="index.html#notice"
+class="home-button"
+>
+목록으로 돌아가기
+</a>
+
+</div>
+
+`;
+
+}
+
+}
+
+
+loadPost();
+
+</script>
+
+</body>
+
+</html>
